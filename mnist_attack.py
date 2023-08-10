@@ -7,6 +7,7 @@ from tqdm import tqdm
 from adv_reprogram.program import MNISTReprogram
 from torchvision import models, datasets, transforms
 from torchmetrics import Accuracy
+from .utils import load_to_memory
 
 
 LR = 5e-2
@@ -35,8 +36,8 @@ def main(dataset_root: str):
     optimizer = optim.Adam(parallel_module.parameters(), lr=LR, weight_decay=LAMBDA)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=LR_DECAY)
 
-    train_dataset = datasets.MNIST(root=dataset_root, download=True, train=True, transform=transforms.ToTensor())
-    eval_dataset = datasets.MNIST(root=dataset_root, download=True, train=False, transform=transforms.ToTensor())
+    train_dataset = load_to_memory(datasets.MNIST(root=dataset_root, download=True, train=True, transform=transforms.ToTensor()))
+    eval_dataset = load_to_memory(datasets.MNIST(root=dataset_root, download=True, train=False, transform=transforms.ToTensor()))
 
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
     eval_dataloader = DataLoader(eval_dataset, batch_size=BATCH_SIZE, num_workers=2)
