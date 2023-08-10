@@ -32,7 +32,7 @@ def main(dataset_root: str):
 
     parallel_module = nn.DataParallel(adv_program).to(device)
 
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam([adv_program.get_parameter('W')], lr=LR, weight_decay=LAMBDA)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=LR_DECAY)
 
