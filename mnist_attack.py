@@ -9,9 +9,10 @@ from torchvision import models, datasets, transforms
 from torchmetrics import Accuracy
 
 
-LR_DECAY = 0.05
-LAMBDA = 0.05
-BATCH_SIZE = 100
+LR = 5e-2
+LR_DECAY = 0.96
+LAMBDA = 5e-7
+BATCH_SIZE = 60
 NUM_EPOCHS = 10
 
 
@@ -31,7 +32,7 @@ def main(dataset_root: str):
     parallel_module = nn.DataParallel(adv_program).to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(parallel_module.parameters(), weight_decay=LAMBDA)
+    optimizer = optim.Adam(parallel_module.parameters(), lr=LR, weight_decay=LAMBDA)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=LR_DECAY)
 
     train_dataset = datasets.MNIST(root=dataset_root, download=True, train=True, transform=transforms.ToTensor())
@@ -53,10 +54,11 @@ def main(dataset_root: str):
         lr_scheduler.step()
         
         # Evaluate over all batches
-        eval_accuracy = Accuracy(task='multiclass', num_classes=10).to(device)
-        for inputs, labels in tqdm(eval_dataloader):
-            outputs = parallel_module(inputs).argmax(dim=1)
-            eval_accuracy(outputs.to(device), labels.to(device))
+        with torch.no_grad():
+            eval_accuracy = Accuracy(task='multiclass', num_classes=10).to(device)
+            for inputs, labels in tqdm(eval_dataloader):
+                outputs = parallel_module(inputs).argmax(dim=1)
+                eval_accuracy(outputs.to(device), labels.to(device))
         
         print(f'epoch [{epoch}/{NUM_EPOCHS}] | Eval Accuracy = {eval_accuracy.compute()}')
 
