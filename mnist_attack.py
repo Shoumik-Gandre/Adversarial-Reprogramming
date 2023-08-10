@@ -1,3 +1,4 @@
+import fire
 import torch
 import torch.nn as nn
 from torch import optim
@@ -61,4 +62,4 @@ def main(dataset_root: str):
 
 
 if __name__ == '__main__':
-    main()
+    fire.Fire(main)
