@@ -25,6 +25,9 @@ class GenericProgram(nn.Module, ABC):
         self.attack_dims = attack_dims
         self.victim_dims = victim_dims
 
+        for param in self.network.parameters():
+            param.requires_grad = False
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # h_f(.)
         X = self.adapter_fn(x).requires_grad_()
@@ -91,7 +94,7 @@ class MNISTReprogram(GenericProgram):
         end_y = start_y + self.attack_dims[2]
 
         x = x.expand(x.shape[0], self.victim_dims[0], self.attack_dims[1], self.attack_dims[2])
-        X[:, :, start_x:end_x, start_y:end_y] = x
+        X[:, :, start_x:end_x, start_y:end_y] = x.data.clone()
 
         return X
     
