@@ -56,7 +56,7 @@ def main(dataset_root: str):
         eval_accuracy = Accuracy(task='multiclass', num_classes=10).to(device)
         for inputs, labels in tqdm(eval_dataloader):
             outputs = parallel_module(inputs).argmax(dim=1)
-            eval_accuracy(outputs, labels)
+            eval_accuracy(outputs.to(device), labels.to(device))
         
         print(f'epoch [{epoch}/{NUM_EPOCHS}] | Eval Accuracy = {eval_accuracy.compute()}')
 
