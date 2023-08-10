@@ -53,7 +53,7 @@ def main(dataset_root: str):
         lr_scheduler.step()
         
         # Evaluate over all batches
-        eval_accuracy = Accuracy()
+        eval_accuracy = Accuracy(task='multiclass', num_classes=10).to(device)
         for inputs, labels in tqdm(eval_dataloader):
             outputs = parallel_module(inputs).argmax(dim=1)
             eval_accuracy(outputs, labels)
