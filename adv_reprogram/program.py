@@ -4,6 +4,7 @@ from typing import Callable
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import transforms
 
 
 AdapterFn = Callable[[torch.Tensor], torch.Tensor]
@@ -100,3 +101,17 @@ class MNISTReprogram(GenericProgram):
     
     def output_mapper(self, y: torch.Tensor) -> torch.Tensor:
         return y[:, :10]
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # h_f(.)
+        X = self.adapter_fn(x).requires_grad_()
+        P = torch.sigmoid(self.W * self.mask)
+        X_adv = X + P
+        mean = torch.tensor([0.485, 0.456, 0.406], device=X_adv.device).reshape(-1, 1, 1)
+        std = torch.tensor([0.229, 0.224, 0.225], device=X_adv.device).reshape(-1, 1, 1)
+        X_adv = (X_adv - mean) / std
+        # f(.)
+        Y_adv = F.softmax(self.network(X_adv), dim=1)
+        
+        # h_g(.)
+        return self.output_mapper(Y_adv)
