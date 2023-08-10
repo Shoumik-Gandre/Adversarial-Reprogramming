@@ -7,7 +7,7 @@ from tqdm import tqdm
 from adv_reprogram.program import MNISTReprogram
 from torchvision import models, datasets, transforms
 from torchmetrics import Accuracy
-from .utils import load_to_memory
+from utils import load_to_memory
 
 
 LR = 5e-2
