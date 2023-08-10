@@ -33,7 +33,7 @@ def main(dataset_root: str):
     parallel_module = nn.DataParallel(adv_program).to(device)
 
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = optim.Adam(adv_program.get_parameter('W'), lr=LR, weight_decay=LAMBDA)
+    optimizer = optim.Adam([adv_program.get_parameter('W')], lr=LR, weight_decay=LAMBDA)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=LR_DECAY)
 
     train_dataset = load_to_memory(datasets.MNIST(root=dataset_root, download=True, train=True, transform=transforms.ToTensor()))
